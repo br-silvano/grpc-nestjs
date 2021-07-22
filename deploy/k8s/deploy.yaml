@@ -1,0 +1,127 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: grpc-nestjs
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hello-world-service
+  namespace: grpc-nestjs
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: hello-world-service
+  template:
+    metadata:
+      labels:
+        app: hello-world-service
+    spec:
+      containers:
+        - name: hello-world-service
+          image: brsilvano/grpc-nestjs-hello-world-service:latest
+          imagePullPolicy: "IfNotPresent"
+          ports:
+            - containerPort: 50052
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: hello-world-service
+  namespace: grpc-nestjs
+  labels:
+    app: hello-world-service
+spec:
+  type: NodePort
+  ports:
+   - port: 50052
+  selector:
+   app: hello-world-service
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: custom-hello-service
+  namespace: grpc-nestjs
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: custom-hello-service
+  template:
+    metadata:
+      labels:
+        app: custom-hello-service
+    spec:
+      containers:
+        - name: custom-hello-service
+          image: brsilvano/grpc-nestjs-custom-hello-service:latest
+          imagePullPolicy: "IfNotPresent"
+          ports:
+            - containerPort: 50052
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: custom-hello-service
+  namespace: grpc-nestjs
+  labels:
+    app: custom-hello-service
+spec:
+  type: NodePort
+  ports:
+   - port: 50052
+  selector:
+   app: custom-hello-service
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: api-gateway-config
+  namespace: grpc-nestjs
+  labels:
+    app: api-gateway
+data:
+  GRPC_HOST_HELLO_WORLD: hello-world-service:50052
+  GRPC_HOST_CUSTOM_HELLO: custom-hello-service:50052
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api-gateway
+  namespace: grpc-nestjs
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: api-gateway
+  template:
+    metadata:
+      labels:
+        app: api-gateway
+    spec:
+      containers:
+        - name: api-gateway
+          image: brsilvano/grpc-nestjs-api-gateway:latest
+          imagePullPolicy: "IfNotPresent"
+          ports:
+            - containerPort: 3000
+          envFrom:
+            - configMapRef:
+                name: api-gateway-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: api-gateway
+  namespace: grpc-nestjs
+  labels:
+    app: api-gateway
+spec:
+  type: NodePort
+  ports:
+   - port: 3000
+     nodePort: 30000
+  selector:
+   app: api-gateway

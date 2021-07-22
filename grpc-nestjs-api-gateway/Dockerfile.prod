@@ -1,0 +1,36 @@
+# Build Stage 1
+# This build created a staging docker image
+#
+FROM node:14.15.4-alpine3.12 as builder
+
+WORKDIR /home/node/service
+
+COPY ["package.json", "yarn.lock", "./"]
+
+RUN npm install -g yarn --force
+
+RUN yarn install
+
+COPY . .
+
+RUN yarn build
+
+# Build Stage 2
+# This build takes the production build from staging build
+#
+FROM builder as build
+
+ARG NODE_ENV=production
+ENV NODE_ENV=${NODE_ENV}
+
+WORKDIR /home/node/service
+
+COPY ["package.json", "yarn.lock", "./"]
+
+RUN yarn install --production
+
+COPY --from=builder /home/node/service/dist ./dist
+
+EXPOSE 3000
+
+CMD ["node", "dist/main"]

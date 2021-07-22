@@ -1,0 +1,12 @@
+{
+  "name": "protos",
+  "version": "1.0.0",
+  "license": "UNLICENSED",
+  "scripts": {
+    "gen": "./compile.sh"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "ts-proto": "^1.82.2"
+  }
+}

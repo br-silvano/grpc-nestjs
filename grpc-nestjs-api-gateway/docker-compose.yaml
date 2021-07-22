@@ -1,0 +1,16 @@
+version: '3'
+
+services:
+  api-gateway:
+    build: .
+    entrypoint: dockerize -wait tcp://${GRPC_HOST_HELLO_WORLD} -wait tcp://${GRPC_HOST_CUSTOM_HELLO} -timeout 40s ./.docker/entrypoint.sh
+    container_name: grpc-nestjs-api-gateway
+    ports:
+      - 3000:3000
+      #- 9229:9229
+    env_file:
+      - .env
+    volumes:
+      - .:/home/node/service
+    extra_hosts:
+        - 'host.docker.internal:172.17.0.1'

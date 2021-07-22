@@ -1,0 +1,23 @@
+version: "3.7"
+
+services:
+  hello-world-service:
+    image: brsilvano/grpc-nestjs-hello-world-service:latest
+    ports:
+      - 50053:50052
+
+  custom-hello-service:
+    image: brsilvano/grpc-nestjs-custom-hello-service:latest
+    ports:
+      - 50054:50052
+
+  api-gateway:
+    image: brsilvano/grpc-nestjs-api-gateway:latest
+    ports:
+      - 3000:3000
+    environment:
+      - GRPC_HOST_HELLO_WORLD=192.168.0.38:50053
+      - GRPC_HOST_CUSTOM_HELLO=192.168.0.38:50054
+    depends_on:
+      - hello-world-service
+      - custom-hello-service

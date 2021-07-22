@@ -1,0 +1,14 @@
+version: '3'
+
+services:
+  custom-hello-service:
+    build: .
+    command: ./.docker/entrypoint.sh
+    container_name: grpc-nestjs-custom-hello-service
+    ports:
+      - 50054:50052
+      #- 9229:9229
+    volumes:
+      - .:/home/node/service
+    #extra_hosts: 
+    #    - 'host.docker.internal:172.17.0.1'
